@@ -7,7 +7,7 @@
 
     <script type="text/javascript">
         Rally.onReady(function () {
-                Ext.define("CustomApp",{extend:"Rally.app.App",componentCls:"app",items:{html:'<a href="https://help.rallydev.com/apps/2.0rc3/doc/">App SDK 2.0rc3 Docs</a>'},launch:function(){}});
+                var app=null;Ext.define("CustomApp",{extend:"Rally.app.App",componentCls:"app",items:{html:'<a href="https://help.rallydev.com/apps/2.0rc3/doc/">App SDK 2.0rc3 Docs</a>'},launch:function(){app=this;var currentContext=app.getContext(),user=currentContext.getUser();console.log("user",user.ObjectID);var storeConfig={find:{Owner:user.ObjectID,__At:"current"},fetch:["FormattedID","Name","_TypeHierarchy"],hydrate:["_TypeHierarchy"],autoLoad:!0,pageSize:1e4,limit:"Infinity",listeners:{scope:this,load:function(store,snapshots,success){console.log(snapshots)}}},snapshotStore=Ext.create("Rally.data.lookback.SnapshotStore",storeConfig),grid=Ext.create("Rally.ui.grid.Grid",{columnCfgs:[{text:"ID",dataIndex:"FormattedID"},{text:"Name",dataIndex:"Name"},{text:"Type",dataIndex:"_TypeHierarchy",renderer:app.renderType}],store:snapshotStore});app.add(grid)},renderType:function(v){return _.last(v)}});
 
             Rally.launchApp('CustomApp', {
                 name:"owned-by-me",
