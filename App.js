@@ -3,7 +3,7 @@ var app = null;
 Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
-    items:{ html:'<a href="https://help.rallydev.com/apps/2.0rc3/doc/">App SDK 2.0rc3 Docs</a>'},
+    items:{  },
     launch: function() {
         //Write app code here
         app = this;
@@ -13,11 +13,20 @@ Ext.define('CustomApp', {
 		var user = currentContext.getUser();
 		console.log("user",user.ObjectID);
 
+		var search = Ext.create( 'Rally.ui.combobox.UserSearchComboBox', {
+			project: currentContext.getProject(),
+			listeners: {
+				select : function(combo,records,eOpts) {
+					console.log("records",records);
+					app.update(records[0]);
+				}
+			}
+		});
+
+		app.add(search);
+
 		var storeConfig = {
-			find : {
-				"Owner" : user.ObjectID,
-				"__At" : "current"
-			},
+			filters: app.createFilters(currentContext,user.ObjectID),
 			fetch   : ["FormattedID","Name","_TypeHierarchy"],
 			hydrate : ["_TypeHierarchy"],
 			autoLoad : true,
@@ -33,7 +42,7 @@ Ext.define('CustomApp', {
 
 		var snapshotStore = Ext.create('Rally.data.lookback.SnapshotStore', storeConfig);
 
-		var grid = Ext.create('Rally.ui.grid.Grid', {
+		app.grid = Ext.create('Rally.ui.grid.Grid', {
 
 			columnCfgs: [
                             {text:'ID',dataIndex:'FormattedID'},
@@ -45,7 +54,34 @@ Ext.define('CustomApp', {
 
 		});
 
-		app.add(grid);
+		app.add(app.grid);
+    },
+
+    update : function( user ) {
+    	console.log("Filter to user:" + user.get("UserName") + " : " + user.get("ObjectID"));
+    	app.grid.store.clearFilter(true);
+    	var filters = app.createFilters(app.getContext(), user.get("ObjectID"));
+		app.grid.store.filter( filters );
+    },
+
+    createFilters : function(ctx, userID) {
+    	return [
+				{
+					property: "_ProjectHierarchy",
+					operator : "in",
+					value : [ctx.getProject().ObjectID]
+				},
+		        {
+		            property: 'Owner',
+		            operator: '=',
+		            value: userID
+		        },
+                {
+		            property: '__At',
+		            operator: '=',
+		            value: "current"
+		        }
+    	];
     },
 
     renderType : function(v) {
