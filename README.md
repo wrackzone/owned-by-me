@@ -4,7 +4,7 @@ owned-by-me
 ## Overview
 Author: Barry Mullan (2014)
 
-A simple table of all artifacts owned by me. Users the LookbackAPI so only works with SAAS version.
+A simple table of all artifacts owned by the current user. Users the LookbackAPI so only works with SAAS version.
 
 
 ![alt text](https://raw.githubusercontent.com/wrackzone/owned-by-me/master/owned-by-me.png)
